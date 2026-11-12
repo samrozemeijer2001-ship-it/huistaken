@@ -8,10 +8,10 @@
    ============================================================ */
 
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCbFTIulpNIin431t1AMZgmxFVvWfaJoqg",
+  authDomain: "huistaken-app-9efad.firebaseapp.com",
+  projectId: "huistaken-app-9efad",
+  storageBucket: "huistaken-app-9efad.firebasestorage.app",
+  messagingSenderId: "58981584821",
+  appId: "1:58981584821:web:168a6bf08b3ec7f07e93fc"
 };
