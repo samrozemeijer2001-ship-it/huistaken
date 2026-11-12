@@ -1,0 +1,48 @@
+rules_version = '2';
+// Beveiligingsregels: alleen leden van een huis kunnen dat huis lezen
+// en aanpassen. Joinen kan alleen met de juiste uitnodigingscode.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function household(hid) { return get(/databases/$(database)/documents/households/$(hid)).data; }
+    function householdAfter(hid) { return getAfter(/databases/$(database)/documents/households/$(hid)).data; }
+    function memberOf(hid) { return signedIn() && request.auth.uid in household(hid).memberIds; }
+    // Voor schrijfacties die in dezelfde batch als het huis zelf gebeuren
+    function memberAfter(hid) { return signedIn() && request.auth.uid in householdAfter(hid).memberIds; }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /inviteCodes/{code} {
+      // Opvragen met de exacte code mag, de lijst doorbladeren niet
+      allow get: if signedIn();
+      allow create: if memberAfter(request.resource.data.householdId);
+      allow update, delete: if memberOf(resource.data.householdId);
+    }
+
+    match /households/{hid} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberIds;
+
+      allow create: if signedIn()
+        && request.resource.data.memberIds == [request.auth.uid];
+
+      // Leden mogen het huis aanpassen
+      allow update: if signedIn() && request.auth.uid in resource.data.memberIds;
+
+      // Niet-leden mogen alléén zichzelf toevoegen, met de juiste code
+      allow update: if signedIn()
+        && !(request.auth.uid in resource.data.memberIds)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds', 'joinCode'])
+        && request.resource.data.joinCode == resource.data.code
+        && request.resource.data.memberIds.toSet() == resource.data.memberIds.toSet().union([request.auth.uid].toSet());
+
+      match /{sub}/{docId} {
+        allow read: if memberOf(hid);
+        allow write: if memberAfter(hid)
+          && sub in ['members', 'tasks', 'weeks', 'completions'];
+      }
+    }
+  }
+}

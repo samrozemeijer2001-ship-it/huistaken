@@ -1,0 +1,7 @@
+/* Lettertypes lokaal meegeleverd (open source, SIL OFL): werkt offline
+   en er gaat geen verzoek naar Google (fijn voor privacy/AVG). */
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 900; font-display: swap; src: url(barlow-condensed-latin-900-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Rubik'; font-style: normal; font-weight: 400; font-display: swap; src: url(rubik-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Rubik'; font-style: normal; font-weight: 600; font-display: swap; src: url(rubik-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Rubik'; font-style: normal; font-weight: 700; font-display: swap; src: url(rubik-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Rubik'; font-style: normal; font-weight: 800; font-display: swap; src: url(rubik-latin-800-normal.woff2) format('woff2'); }

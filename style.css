@@ -1,0 +1,1302 @@
+/* ============================================================
+   STYLE.CSS — BR Chore Tracker in Lafbekken-stijl
+   ------------------------------------------------------------
+   Brutaal, plat en kleurrijk: een interactieve poster.
+   Regels: geen borders, geen schaduwen, geen gradients, geen
+   blur, geen pill-vormen. Kleur, compositie en typografie doen
+   het werk. Alle kleuren, maten en curves staan hieronder als
+   custom properties.
+   ============================================================ */
+
+:root {
+  /* ---- Basiskleuren ---- */
+  --ink: #141210;
+  --paper: #fff6ea;
+  --bg: #f3ede4;
+
+  /* ---- Kleurparen (vlak / tekst & illustratie) ---- */
+  --mint: #7fe0a8;        --mint-ink: #0f5a3a;
+  --sky: #7fb7ff;         --sky-ink: #14306b;
+  --lilac: #b98cff;       --lilac-ink: #2b1360;
+  --cobalt: #2747c9;      --cobalt-ink: #d8e4ff;
+  --yellow: #ffcc2e;      --yellow-ink: #a3300f;
+  --orange: #ff8a3d;      --orange-ink: #4a1a05;
+  --red: #ff5a3c;         --red-ink: #fff3c4;
+  --purple: #3a1a6b;      --purple-ink: #ff8fc8;
+  --pink: #ff8fc8;        --pink-ink: #6b0f3a;
+
+  /* ---- Afrondingen ---- */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-card: 30px;
+  --r-hero: 36px;
+  --r-btn: 20px;
+  --r-icon: 14px;
+  --r-sheet: 30px;
+
+  /* ---- Ruimte ---- */
+  --gutter: 24px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ---- Typografie ---- */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Rubik', system-ui, sans-serif;
+
+  /* ---- Beweging ---- */
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --soft: cubic-bezier(.22, 1, .36, 1);
+}
+
+/* ---- Persoonskleuren ----
+   De klassenamen komen uit data.js (colorClass) en blijven gelijk.
+   --c-bg = vlak, --c-ink = tekst/illustratie op dat vlak. */
+.card-pink   { --c-bg: var(--pink);   --c-ink: var(--pink-ink); }
+.card-blue   { --c-bg: var(--cobalt); --c-ink: var(--cobalt-ink); }
+.card-orange { --c-bg: var(--orange); --c-ink: var(--orange-ink); }
+.card-green  { --c-bg: var(--mint);   --c-ink: var(--mint-ink); }
+.card-yellow { --c-bg: var(--yellow); --c-ink: var(--yellow-ink); }
+.card-lilac  { --c-bg: var(--lilac);  --c-ink: var(--lilac-ink); }
+.card-sky    { --c-bg: var(--sky);    --c-ink: var(--sky-ink); }
+.card-red    { --c-bg: var(--red);    --c-ink: var(--red-ink); }
+
+/* Donker/licht per persoon voor de kopband bovenin: de band loopt onder
+   de (witte) iPhone-statusbalk door, dus die moet donker genoeg zijn. */
+.card-pink   { --c-dark: var(--pink-ink);   --c-light: var(--pink); }
+.card-blue   { --c-dark: var(--cobalt);     --c-light: var(--cobalt-ink); }
+.card-orange { --c-dark: var(--orange-ink); --c-light: var(--orange); }
+.card-green  { --c-dark: var(--mint-ink);   --c-light: var(--mint); }
+.card-yellow { --c-dark: var(--yellow-ink); --c-light: var(--yellow); }
+.card-lilac  { --c-dark: var(--lilac-ink);  --c-light: var(--lilac); }
+.card-sky    { --c-dark: var(--sky-ink);    --c-light: var(--sky); }
+.card-red    { --c-dark: #7a1a0c;           --c-light: var(--red-ink); }
+
+/* Foto's komen nu per bewoner uit de database (inline style). Geen foto?
+   Dan een grote beginletter op het vlak. */
+.photo-initial {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(64px, 24cqw, 120px);
+  line-height: 1;
+  color: var(--c-bg);
+  opacity: .9;
+  pointer-events: none;
+}
+.hero-photo .photo-initial { font-size: clamp(140px, 50cqw, 240px); padding-bottom: 6%; }
+
+/* ============================================================
+   BASIS
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+svg { display: block; width: 100%; height: 100%; }
+
+/* De app is één schermvullend 'telefoonvlak' */
+.app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--bg);
+  container-type: inline-size; /* cqw-eenheden schalen mee met de app-breedte */
+}
+
+/* Op desktop: gecentreerde telefoon-interface */
+@media (min-width: 600px) and (min-height: 640px) {
+  body {
+    background: var(--ink);
+    display: grid;
+    place-items: center;
+  }
+  .app {
+    width: 430px;
+    height: min(932px, calc(100dvh - 48px));
+    border-radius: 46px;
+  }
+}
+
+/* Kleine labels (Rubik 800) */
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 12.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Barlow-koppen: altijd hoofdletters, strak op elkaar */
+.app-title, .week-num, .card-name, .detail-name, .detail-task-name,
+.done-title, .celebrate-title, .rules-sheet-title, .back-button,
+.done-button, .card-done, .hero-stamp, #loading-text {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -.005em;
+  line-height: .85;
+}
+
+/* Vierkante icoonknop 44×44 */
+.icon-button {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: var(--r-icon);
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  transition: transform 420ms var(--spring);
+}
+.icon-button span { width: 22px; height: 22px; }
+.icon-button:active { transform: scale(.9); transition-duration: 90ms; }
+
+/* ============================================================
+   SCHERMEN
+   Home is de basislaag; het taakscherm schuift eroverheen.
+   ============================================================ */
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none; /* geen doorveren → geen kale randen boven/onder */
+}
+.detail-screen { visibility: hidden; z-index: 5; }
+.detail-screen.active { visibility: visible; }
+
+/* ============================================================
+   SCHERM A — HOME
+   ============================================================ */
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 var(--gutter) calc(var(--safe-bottom) + 18px);
+}
+
+/* Inktband bovenin: loopt door tot onder de statusbalk (klok blijft leesbaar) */
+.home-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: calc(var(--safe-top) + 10px) var(--gutter) 12px;
+  border-radius: 0 0 var(--r-sheet) var(--r-sheet);
+  background: var(--ink);
+  color: var(--paper);
+}
+.home-topbar { position: relative; }
+
+/* Kapje achter de statusbalk: verschijnt pas als je wegscrolt van de
+   kopband, zodat tekst nooit onder de klok door schuift. Zelfde kleur als
+   de band → bij terugscrollen versmelt het er naadloos mee. */
+.status-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: var(--safe-top);
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms var(--soft);
+}
+.status-cover.show { opacity: 1; }
+.status-cover.on-detail { background: var(--c-dark); }
+.home-topbar .icon-button { background: var(--paper); color: var(--ink); }
+
+/* Verlengstuk boven de kopbanden: wie (op oudere iPhones) omlaag doorveert,
+   ziet de band gewoon verder lopen in plaats van een kale rand */
+.home-topbar::before, .detail-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 100vh;
+  background: inherit;
+  pointer-events: none;
+}
+
+.home-header {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: clamp(46px, 15.5vw, 76px);
+  font-size: clamp(46px, 15.5cqw, 76px);
+  line-height: .82;
+  align-self: end;
+  animation: rise-in 620ms var(--soft) both;
+}
+
+/* Week-vlak: compact, geel, groot getal */
+.week-block {
+  flex: none;
+  width: clamp(98px, 30cqw, 124px);
+  border-radius: var(--r-lg);
+  background: var(--yellow);
+  color: var(--yellow-ink);
+  padding: 10px 12px 11px;
+  display: flex;
+  flex-direction: column;
+  animation: pop-in 640ms var(--spring) 120ms both;
+}
+.week-label, .week-range, .week-left {
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .06em;
+  line-height: 1.1;
+}
+.week-num {
+  font-size: clamp(50px, 16cqw, 66px);
+  margin: 2px 0 4px -2px;
+}
+.week-left { margin-top: 2px; opacity: .72; white-space: nowrap; }
+
+/* ---- 2×2-grid met persoonskaarten ---- */
+.cards-grid {
+  flex: 1;
+  min-height: 360px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: minmax(200px, 1fr); /* 2–4 bewoners vullen het scherm, meer = scrollen */
+  gap: 12px;
+}
+.cards-grid.single { grid-template-columns: 1fr; min-height: 300px; flex: 0 0 auto; grid-auto-rows: 300px; }
+
+.person-card {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 7px 7px 13px;
+  border-radius: var(--r-card);
+  background: var(--c-bg);
+  color: var(--c-ink);
+  text-align: left;
+  transition: transform 460ms var(--spring);
+}
+.person-card:active { transform: scale(.94); transition-duration: 110ms; }
+
+/* Kaarten veren binnen (bij laden en bij terugkomen) */
+.cards-grid.enter .person-card {
+  animation: card-in 680ms var(--spring) both;
+  animation-delay: calc(var(--i) * 70ms + 80ms);
+}
+
+/* Foto groot bovenin de kaart */
+.card-photo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  border-radius: 23px;
+  background-color: var(--c-ink);
+  background-size: cover;
+  background-position: center 28%;
+  background-repeat: no-repeat;
+}
+
+/* Taakillustratie als grote sticker op de foto */
+.card-task {
+  position: absolute;
+  left: 7px;
+  bottom: 7px;
+  width: clamp(48px, 16cqw, 66px);
+  aspect-ratio: 1;
+  padding: 7px;
+  border-radius: var(--r-md);
+  background: var(--c-ink);
+  color: var(--c-bg);
+  transform: rotate(-5deg);
+}
+
+/* "KLAAR"-stempel op de kaart */
+.card-done {
+  position: absolute;
+  top: 9px;
+  right: 7px;
+  padding: 7px 9px 5px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 20px;
+  transform: rotate(6deg) scale(0);
+  transition: transform 520ms var(--spring);
+}
+.person-card.is-done .card-done { transform: rotate(6deg) scale(1); }
+
+.card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 6px 0 7px;
+}
+.card-name {
+  --len: 4;
+  min-width: 0;
+  /* schaalt mee met de naamlengte, zodat een naam nooit afbreekt */
+  font-size: clamp(20px, 9cqw, 38px);
+  font-size: clamp(18px, calc((50cqw - 78px) * 1.8 / var(--len)), 38px);
+  white-space: nowrap;
+}
+.card-face {
+  flex: none;
+  width: clamp(34px, 11cqw, 44px);
+  aspect-ratio: 1;
+}
+.person-card .strikes { padding: 0 7px; }
+
+/* ---- Kruisjes ---- */
+.strikes { display: flex; gap: 6px; }
+.strike {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  padding: 3px;
+  opacity: .2;
+  transition: opacity 200ms var(--soft);
+}
+.strike svg { opacity: 0; }
+.strike.strike-active { opacity: 1; }
+.strike.strike-active svg { opacity: 1; }
+.strike.pop { animation: strike-pop 560ms var(--spring); }
+
+.strikes-lg { gap: 8px; }
+.strikes-lg .strike { width: 40px; height: 40px; border-radius: var(--r-sm); padding: 6px; }
+
+/* ============================================================
+   SCHERM B — PERSOONLIJK TAAKSCHERM
+   ============================================================ */
+.detail-screen {
+  display: flex;
+  flex-direction: column;
+  background: var(--c-bg);
+  color: var(--c-ink);
+}
+
+/* Kleur neemt het scherm over vanuit de aangetikte kaart */
+.detail-screen.active {
+  animation: reveal 560ms var(--soft) both;
+}
+.detail-screen.closing {
+  animation: conceal 380ms var(--soft) forwards;
+}
+
+.detail-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: calc(var(--safe-top) + 10px) var(--gutter) 12px;
+  border-radius: 0 0 var(--r-sheet) var(--r-sheet);
+  background: var(--c-dark);
+  position: relative;
+}
+
+.back-button {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px 0 10px;
+  border-radius: var(--r-icon);
+  background: var(--c-light);
+  color: var(--c-dark);
+  font-size: 24px;
+  line-height: 1;
+  transition: transform 420ms var(--spring);
+}
+.back-button:active { transform: scale(.94); transition-duration: 90ms; }
+.back-icon { width: 22px; height: 22px; }
+
+.week-chip {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: var(--r-icon);
+  background: var(--c-light);
+  color: var(--c-dark);
+  font-weight: 800;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+}
+
+.detail-intro { padding: 14px var(--gutter) 12px; }
+.intro-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.detail-name {
+  --len: 5;
+  margin: 10px 0 0 -3px;
+  font-size: clamp(56px, 28vw, 104px);
+  font-size: clamp(56px, calc(100cqw * 1.7 / var(--len)), 104px);
+  white-space: nowrap;
+}
+
+/* ---- Hoofdbeeld ---- */
+.hero {
+  position: relative;
+  margin: 0 var(--gutter);
+  height: clamp(240px, 42dvh, 540px);
+  flex: none;
+}
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-hero);
+  background-color: var(--c-ink);
+  background-size: cover;
+  background-position: center 28%;
+  background-repeat: no-repeat;
+}
+
+/* Stickers op de foto: smiley (rechtsboven) en taak (linksonder) */
+.hero-face, .hero-task {
+  position: absolute;
+  width: clamp(96px, 31cqw, 132px);
+  aspect-ratio: 1;
+  border-radius: 28px;
+}
+.hero-face {
+  top: -16px;
+  right: -10px;
+  padding: 12px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  transform: rotate(6deg);
+}
+.hero-task {
+  left: -8px;
+  bottom: -24px;
+  padding: 16px;
+  background: var(--c-ink);
+  color: var(--c-bg);
+  transform: rotate(-5deg);
+}
+
+/* "KLAAR"-stempel, alleen zichtbaar als de taak gedaan is */
+.hero-stamp {
+  position: absolute;
+  right: 16px;
+  bottom: 18px;
+  padding: 12px 16px 8px;
+  border-radius: var(--r-md);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: clamp(44px, 15cqw, 64px);
+  transform: rotate(-7deg) scale(0);
+}
+.detail-screen.is-done .hero-stamp {
+  animation: stamp-in 620ms var(--spring) 120ms both;
+}
+
+/* Intro-animaties van het taakscherm (spelen bij openen) */
+.detail-screen.active .detail-name   { animation: rise-in 640ms var(--soft) 60ms both; }
+.detail-screen.active .hero-photo    { animation: hero-in 720ms var(--spring) 90ms both; }
+.detail-screen.active .hero-face     { animation: sticker-in-r 700ms var(--spring) 260ms both; }
+.detail-screen.active .hero-task     { animation: sticker-in-l 700ms var(--spring) 340ms both; }
+.detail-screen.active .task-block    { animation: rise-in 620ms var(--soft) 200ms both; }
+.detail-screen.active .panel         { animation: panel-in 640ms var(--soft) 260ms both; }
+
+.task-block { padding: 42px var(--gutter) 0; }
+.detail-task-name {
+  margin: 10px 0 0;
+  font-size: clamp(38px, 12cqw, 58px);
+  line-height: .9;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Rustig onderpaneel met de instructies ---- */
+.panel {
+  flex: 1 0 auto;
+  margin-top: 28px;
+  padding: 26px var(--gutter) 6px;
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+.instructions {
+  margin: 10px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.42;
+}
+
+.done-note { display: none; margin-bottom: 22px; }
+.detail-screen.is-done .done-note { display: block; animation: pop-in 560ms var(--spring) both; }
+.done-title { margin: 0; font-size: clamp(56px, 19cqw, 84px); color: var(--ink); }
+.done-meta { margin: 10px 0 0; font-weight: 800; font-size: 12.5px; letter-spacing: .06em; opacity: .6; }
+
+/* Actieknop: hoort bij het paneel (één doorlopend papiervlak, geen
+   losse balk die over de foto schuift → geen harde randen bij scrollen) */
+.action-bar {
+  padding: 14px var(--gutter) calc(var(--safe-bottom) + 18px);
+  background: var(--paper);
+  margin-top: -1px;
+}
+.detail-screen.active .action-bar { animation: panel-in 640ms var(--soft) 260ms both; }
+.detail-screen.no-task .action-bar { display: none; }
+
+.done-button {
+  width: 100%;
+  min-height: 72px;
+  border-radius: var(--r-btn);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: clamp(21px, 7cqw, 28px);
+  line-height: 1;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 16px 2px;
+  transition: transform 460ms var(--spring), background-color 240ms var(--soft), color 240ms var(--soft);
+}
+.done-button:active:not(:disabled) { transform: scale(.94); transition-duration: 100ms; }
+.done-button:disabled { cursor: default; }
+.done-button.is-saving { opacity: .7; }
+.done-button.is-error { background: var(--red); color: var(--red-ink); font-size: 22px; }
+.detail-screen.is-done .done-button { background: var(--c-bg); color: var(--c-ink); }
+.done-button .btn-icon { width: 28px; height: 28px; flex: none; margin-top: -4px; }
+
+/* ============================================================
+   SCHERM C — VOLTOOID (korte feestelijke overlay)
+   ============================================================ */
+.celebrate {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: var(--gutter);
+  text-align: center;
+  overflow: hidden;
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+.celebrate.show { display: flex; animation: burst-in 560ms var(--spring) both; }
+.celebrate.hide { display: flex; animation: burst-out 340ms var(--soft) forwards; }
+
+.celebrate-face { width: min(58cqw, 260px); aspect-ratio: 1; position: relative; z-index: 2; }
+.celebrate-title { margin: 0; font-size: clamp(70px, 26cqw, 104px); position: relative; z-index: 2; }
+.celebrate.show .celebrate-title { animation: pop-in 620ms var(--spring) 160ms both; }
+.celebrate-sub { margin: 0; font-weight: 800; font-size: 13px; letter-spacing: .08em; position: relative; z-index: 2; }
+
+.confetti { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.confetti i {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: var(--s);
+  height: var(--s);
+  border-radius: 6px;
+  background: var(--k);
+  animation: confetti-fly 1100ms var(--soft) var(--d) both;
+}
+
+/* ============================================================
+   LAADSCHERM
+   ============================================================ */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 40px var(--gutter);
+  text-align: center;
+  background: var(--yellow);
+  color: var(--yellow-ink);
+  transition: opacity 320ms var(--soft);
+}
+.loading-overlay.is-hidden { opacity: 0; pointer-events: none; }
+.loading-face { width: 150px; aspect-ratio: 1; }
+#loading-text { margin: 0; font-size: 44px; }
+.loading-overlay.is-error { background: var(--red); color: var(--red-ink); }
+.loading-overlay.is-error #loading-text {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.4;
+  text-transform: none;
+  max-width: 300px;
+}
+
+/* ============================================================
+   HUISREGELS — onderpaneel
+   ============================================================ */
+.rules-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: rgba(20, 18, 16, .55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 260ms var(--soft), visibility 260ms;
+}
+.rules-overlay.active { opacity: 1; visibility: visible; }
+
+.rules-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -120px;               /* steekt onder het scherm uit… */
+  z-index: 61;
+  max-height: calc(80% + 120px);
+  overflow-y: auto;
+  overscroll-behavior: none;
+  padding: 26px var(--gutter) calc(var(--safe-bottom) + 26px + 120px); /* …en compenseert dat hier */
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--paper);
+  transform: translateY(105%);
+  visibility: hidden;
+  transition: transform 520ms var(--soft), visibility 520ms;
+}
+.rules-sheet.active { transform: translateY(0); visibility: visible; transition: transform 560ms var(--spring), visibility 0s; }
+
+.rules-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.rules-sheet-title { margin: 0; font-size: clamp(56px, 19cqw, 84px); }
+
+.rules-list { display: flex; flex-direction: column; gap: 10px; }
+.rule-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: var(--r-lg);
+  background: var(--k-bg);
+  color: var(--k-ink);
+}
+.rules-sheet.active .rule-item {
+  animation: card-in 600ms var(--spring) both;
+  animation-delay: calc(var(--i) * 45ms + 120ms);
+}
+.rule-icon { width: 30px; height: 30px; flex: none; }
+.rule-text { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+
+
+/* ============================================================
+   SMILEYS — losse onderdelen bewegen apart (aangestuurd door app.js)
+   ============================================================ */
+.face svg { overflow: visible; }
+.smiley { animation: face-in 680ms var(--spring) both; }
+.smiley .eyes  { transition: transform 360ms var(--soft); }
+.smiley .mouth { transition: transform 460ms var(--soft) 110ms; }
+.smiley .blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 90ms ease-in-out;
+}
+.smiley .blink.shut { transform: scaleY(.12); }
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes face-in {
+  from { transform: scale(.2) rotate(-14deg); opacity: 0; }
+  60%  { opacity: 1; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes card-in {
+  from { transform: translateY(28px) scale(.86); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes pop-in {
+  from { transform: scale(.6); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes rise-in {
+  from { transform: translateY(26px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes reveal {
+  from { clip-path: circle(0 at var(--ox, 50%) var(--oy, 50%)); }
+  to   { clip-path: circle(150% at var(--ox, 50%) var(--oy, 50%)); }
+}
+@keyframes conceal {
+  from { clip-path: circle(150% at var(--ox, 50%) var(--oy, 50%)); }
+  to   { clip-path: circle(0 at var(--ox, 50%) var(--oy, 50%)); }
+}
+@keyframes hero-in {
+  from { transform: scale(.86) rotate(-2deg); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes sticker-in-r {
+  from { transform: rotate(-20deg) scale(.2); }
+  to   { transform: rotate(6deg) scale(1); }
+}
+@keyframes sticker-in-l {
+  from { transform: rotate(18deg) scale(.2); }
+  to   { transform: rotate(-5deg) scale(1); }
+}
+@keyframes stamp-in {
+  from { transform: rotate(-24deg) scale(2.2); opacity: 0; }
+  to   { transform: rotate(-7deg) scale(1); opacity: 1; }
+}
+@keyframes panel-in {
+  from { transform: translateY(60px); }
+  to   { transform: none; }
+}
+@keyframes strike-pop {
+  0%   { transform: scale(.4) rotate(-20deg); }
+  100% { transform: none; }
+}
+@keyframes burst-in {
+  from { clip-path: circle(0 at 50% 85%); }
+  to   { clip-path: circle(150% at 50% 85%); }
+}
+@keyframes burst-out {
+  to { opacity: 0; transform: scale(1.04); }
+}
+@keyframes confetti-fly {
+  0%   { transform: translate(-50%, -50%) scale(.2) rotate(0); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1) rotate(var(--rot)); opacity: 0; }
+}
+
+/* ============================================================
+   KLEINE TELEFOONS
+   ============================================================ */
+@media (max-width: 350px) {
+  :root { --gutter: 16px; }
+  .cards-grid { gap: 10px; }
+  .home-header { gap: 10px; }
+  .week-block { padding: 9px 9px 10px; }
+  .week-label, .week-range, .week-left { font-size: 11px; letter-spacing: .03em; }
+}
+/* Lage schermen (bv. liggend): home mag dan scrollen */
+@media (max-height: 600px) {
+  .cards-grid { min-height: 520px; }
+}
+
+/* ============================================================
+   MINDER BEWEGING — alle animaties uit
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .hero-stamp { transform: rotate(-7deg) scale(0); }
+  .detail-screen.is-done .hero-stamp { transform: rotate(-7deg); }
+}
+
+/* ============================================================
+   NIEUW — MULTI-HUISHOUDEN
+   ============================================================ */
+
+/* Kopband: twee knoppen rechts */
+.topbar-actions { display: flex; gap: 8px; }
+
+/* Huisnaam als titel: krimpt mee met de langste regel */
+.app-title {
+  --len: 6;
+  font-size: clamp(40px, calc((100cqw - 160px) * 1.75 / var(--len)), 76px);
+  overflow-wrap: anywhere;
+}
+
+/* Kaart: "JIJ"-label, vrije week, meerdere klussen */
+.card-me {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  padding: 5px 8px 4px;
+  border-radius: 9px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: .08em;
+  display: none;
+}
+.person-card.is-me .card-me { display: block; }
+.person-card.is-free .card-task { opacity: .55; }
+.card-task.multi::after {
+  content: attr(data-count);
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  font: 800 12px/22px var(--font-body);
+  text-align: center;
+}
+.no-strikes .strikes { display: none; }
+.no-strikes .person-card { padding-bottom: 7px; }
+
+/* Uitnodig-kaart als je nog alleen bent */
+.invite-nudge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border-radius: var(--r-card);
+  background: var(--ink);
+  color: var(--paper);
+  text-align: left;
+  border: 3px dashed rgba(255, 246, 234, .35);
+  animation: card-in 680ms var(--spring) 260ms both;
+}
+.invite-nudge[hidden] { display: none; }
+.invite-nudge-title { font-family: var(--font-display); font-weight: 900; font-size: 34px; line-height: .95; }
+.invite-nudge-code { font-weight: 800; font-size: 15px; letter-spacing: .3em; color: var(--yellow); margin-top: 4px; }
+
+/* Taakscherm: meerdere klussen + notitie voor andermans scherm */
+.multi-task {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 2px solid rgba(20, 18, 16, .08);
+}
+.multi-task:first-child { border-top: 0; padding-top: 0; }
+.multi-icon { width: 46px; height: 46px; flex: none; padding: 6px; border-radius: 14px; background: var(--c-bg); color: var(--c-ink); }
+.multi-body { flex: 1; min-width: 0; }
+.multi-name { font-family: var(--font-display); font-weight: 900; font-size: 26px; text-transform: uppercase; line-height: 1; }
+.multi-body p { margin: 6px 0 0; font-size: 16px; font-weight: 600; line-height: 1.4; }
+.multi-check {
+  width: 46px; height: 46px; flex: none;
+  border-radius: 14px;
+  background: var(--ink); color: var(--paper);
+  padding: 10px;
+  display: grid; place-items: center;
+}
+.multi-check.is-open { opacity: .15; }
+.multi-task.is-done .multi-check { background: var(--c-bg); color: var(--c-ink); }
+.multi-task.is-done .multi-name { text-decoration: line-through; text-decoration-thickness: 3px; }
+.detail-screen.is-done .multi-task { display: none; }
+.detail-screen .done-button[hidden] { display: none; }
+.action-note { margin: 0; font-weight: 700; font-size: 16px; line-height: 1.4; text-align: center; opacity: .7; }
+.action-note:empty { display: none; }
+.no-strikes .detail-screen .strikes { display: none; }
+
+/* ---- Algemene knoppen ---- */
+.done-button.secondary { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 4px var(--ink); }
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 4px 20px 0;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 22px;
+  cursor: pointer;
+}
+.pill-button.small { min-height: 42px; font-size: 18px; padding: 3px 14px 0; border-radius: 12px; }
+.pill-icon { width: 22px; height: 22px; margin-top: -3px; }
+.link-button { font-weight: 700; font-size: 14px; text-decoration: underline; opacity: .7; text-align: left; }
+.link-button[hidden] { display: none; }
+
+/* ============================================================
+   ONBOARDING
+   ============================================================ */
+.onboard-screen {
+  z-index: 40;
+  background: var(--yellow);
+  color: var(--ink);
+  visibility: hidden;
+}
+.onboard-screen.active { visibility: visible; }
+.onboard-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: calc(var(--safe-top) + 28px) var(--gutter) calc(var(--safe-bottom) + 24px);
+}
+.onboard-inner.enter > * { animation: rise-in 520ms var(--soft) both; }
+.onboard-inner.enter > *:nth-child(2) { animation-delay: 40ms; }
+.onboard-inner.enter > *:nth-child(3) { animation-delay: 80ms; }
+.onboard-inner.enter > *:nth-child(n+4) { animation-delay: 120ms; }
+
+.onboard-screen[data-step="welcome"] .onboard-inner { justify-content: flex-end; }
+.ob-hero { flex: 1; display: grid; place-items: center; min-height: 180px; }
+.ob-face {
+  width: min(62cqw, 260px);
+  aspect-ratio: 1;
+  padding: 22px;
+  border-radius: 48px;
+  background: var(--ink);
+  color: var(--yellow);
+  transform: rotate(-6deg);
+}
+.ob-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(56px, 21cqw, 110px);
+  line-height: .84;
+}
+.ob-lead { margin: 0; font-size: 18px; font-weight: 600; line-height: 1.4; max-width: 34ch; }
+.ob-actions { display: flex; flex-direction: column; gap: 10px; margin-top: auto; padding-top: 12px; }
+.ob-demo { margin: 0; text-align: center; font-weight: 800; font-size: 12px; letter-spacing: .08em; opacity: .6; }
+.ob-error { margin: 0; min-height: 1.4em; font-weight: 700; color: var(--yellow-ink); }
+.ob-error.shake { animation: shake 380ms var(--soft); }
+.ob-back {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding: 0 14px 0 8px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--yellow);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.ob-back span { width: 20px; height: 20px; }
+
+/* Startpakketten */
+.tpl-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.tpl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(20, 18, 16, .07);
+  text-align: left;
+  box-shadow: inset 0 0 0 3px transparent;
+  transition: box-shadow 200ms var(--soft), background-color 200ms var(--soft);
+}
+.tpl.on { background: var(--paper); box-shadow: inset 0 0 0 3px var(--ink); }
+.tpl-name { font-family: var(--font-display); font-weight: 900; font-size: 26px; text-transform: uppercase; line-height: 1; }
+.tpl-blurb { grid-column: 1; font-size: 14px; font-weight: 600; opacity: .75; }
+.tpl-icons { grid-column: 2; grid-row: 1 / span 2; display: flex; gap: 2px; }
+.tpl-icons i { width: 26px; height: 26px; display: block; }
+
+/* Wie ben jij? */
+.who-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 20px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  text-align: left;
+}
+.who .set-avatar { width: 44px; height: 44px; background-color: var(--c-ink); color: var(--c-bg); }
+.who-name { font-family: var(--font-display); font-weight: 900; font-size: 24px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* ============================================================
+   FORMULIERVELDEN (onboarding + bewerken)
+   ============================================================ */
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field input[type=text], .field textarea {
+  width: 100%;
+  border: 0;
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 600 18px/1.35 var(--font-body);
+  box-shadow: inset 0 0 0 3px var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.form-sheet .field input[type=text], .form-sheet .field textarea { background: #fff; }
+.field input[type=text]:focus, .field textarea:focus { box-shadow: inset 0 0 0 4px var(--ink), 0 0 0 4px rgba(20, 18, 16, .12); }
+.field textarea { resize: none; }
+.field input.upper {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 44px;
+  letter-spacing: .18em;
+  text-align: center;
+  padding: 12px 12px 6px;
+}
+.field input::placeholder, .field textarea::placeholder { color: rgba(20, 18, 16, .35); }
+
+.icon-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 8px; }
+.pick {
+  aspect-ratio: 1;
+  padding: 9px;
+  border-radius: 14px;
+  background: rgba(20, 18, 16, .07);
+  color: var(--ink);
+  transition: transform 300ms var(--spring);
+}
+.pick.on { background: var(--ink); color: var(--paper); transform: rotate(-4deg); }
+.color-picker { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--c-bg);
+  box-shadow: inset 0 0 0 3px rgba(20, 18, 16, .12);
+  transition: transform 300ms var(--spring);
+}
+.swatch.on { box-shadow: inset 0 0 0 4px var(--ink), inset 0 0 0 7px var(--paper); transform: scale(1.08); }
+
+.photo-field { flex-direction: row; align-items: center; gap: 16px; }
+.photo-preview {
+  width: 92px;
+  height: 92px;
+  flex: none;
+  border-radius: 26px;
+  background: rgba(20, 18, 16, .1) center/cover no-repeat;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  transform: rotate(-4deg);
+}
+.photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+
+/* ============================================================
+   INSTELLINGEN + FORMULIER — onderpanelen
+   ============================================================ */
+.sheet-close span { width: 22px; height: 22px; }
+.settings-sheet { max-height: calc(92% + 120px); }
+.form-sheet { max-height: calc(88% + 120px); }
+.form-title { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: clamp(48px, 15cqw, 64px); line-height: .9; }
+#form-body { display: flex; flex-direction: column; gap: 18px; }
+.form-save { margin-top: 6px; }
+.empty-note { margin: 0; font-weight: 600; opacity: .6; }
+
+.penalty-card {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: var(--r-lg);
+  background: var(--ink);
+  color: var(--paper);
+}
+.penalty-card[hidden] { display: none; }
+.penalty-card p { margin: 6px 0 0; font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 1; text-transform: uppercase; }
+
+.set-section { display: flex; flex-direction: column; gap: 8px; margin-bottom: 26px; }
+.set-section > .eyebrow { opacity: .55; margin-bottom: 2px; }
+.set-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 18px;
+  background: rgba(20, 18, 16, .05);
+}
+.set-icon { width: 40px; height: 40px; flex: none; padding: 5px; }
+.set-avatar {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 13px;
+  background: var(--c-bg) center/cover no-repeat;
+  color: var(--c-ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 24px;
+}
+.set-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.set-title { font-weight: 700; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+.set-sub {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: .6;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.set-btn {
+  flex: none;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 11px;
+  border-radius: 13px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+.set-btn svg { width: 20px; height: 20px; }
+.set-btn.danger { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2.5px var(--ink); }
+.set-btn.armed, .leave-button.armed { background: var(--red); color: var(--red-ink); box-shadow: none; }
+.set-hint { margin: 2px 4px 0; font-size: 13px; font-weight: 600; line-height: 1.4; opacity: .6; }
+
+.add-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 3px rgba(20, 18, 16, .2);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 22px;
+  padding-top: 3px;
+}
+.add-button span { width: 20px; height: 20px; margin-top: -3px; }
+
+.invite-card {
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: var(--yellow);
+  color: var(--yellow-ink);
+  align-items: flex-start;
+}
+.invite-card > .eyebrow { opacity: 1; }
+.invite-code {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(56px, 19cqw, 80px);
+  letter-spacing: .1em;
+  line-height: .9;
+  color: var(--ink);
+  user-select: all;
+  -webkit-user-select: all;
+}
+
+.toggle-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: rgba(20, 18, 16, .05); cursor: pointer; }
+.toggle {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 56px;
+  height: 34px;
+  flex: none;
+  border-radius: 20px;
+  background: rgba(20, 18, 16, .2);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 200ms var(--soft);
+}
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform 320ms var(--spring);
+}
+.toggle:checked { background: var(--ink); }
+.toggle:checked::after { transform: translateX(22px); }
+.toggle:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+.leave-button {
+  min-height: 52px;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 3px var(--red);
+  color: #b3260e;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 22px;
+  padding-top: 3px;
+}
+
+/* ---- Toast ---- */
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 24px);
+  z-index: 100;
+  max-width: calc(100% - 48px);
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 15px;
+  text-align: center;
+  transform: translate(-50%, 140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 380ms var(--soft), opacity 240ms var(--soft);
+}
+.toast.show { transform: translate(-50%, 0); opacity: 1; transition: transform 460ms var(--spring), opacity 160ms; }
+
+@keyframes shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* De app zelf mag nooit verschuiven (bv. als een invoerveld focus krijgt) */
+.app { overflow: clip; }
+.action-note { color: var(--ink); }
