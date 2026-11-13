@@ -480,7 +480,7 @@ function renderDetail(memberId) {
         ${isMe ? `<button type="button" class="multi-check" data-task="${t.id}" ${s.done[i] ? "disabled" : ""} aria-label="${esc(t.name)} afvinken">${ICONS.check}</button>`
                : `<span class="multi-check ${s.done[i] ? "" : "is-open"}">${ICONS.check}</span>`}
       </div>`).join("");
-    list.querySelectorAll("button.multi-check").forEach(b => b.addEventListener("click", () => complete([b.dataset.task])));
+    list.querySelectorAll("button.multi-check").forEach(b => holdToConfirm(b, () => complete([b.dataset.task])));
   }
   $("done-meta").textContent = s.allDone ? formatDoneMoment(s.completedAt) : "";
 
@@ -510,6 +510,7 @@ function renderDetail(memberId) {
     detailButton.disabled = false;
     detailButton.classList.remove("is-saving");
     detailButton.textContent = s.tasks.length > 1 ? "IK HEB ALLES GEDAAN" : "IK HEB HET GEDAAN";
+    note.textContent = "Houd de knop ingedrukt om af te vinken";
   }
 }
 
@@ -580,7 +581,78 @@ function complete(taskIds) {
     });
 }
 
-detailButton.addEventListener("click", () => {
+// ============================================================
+// VASTHOUDEN OM TE BEVESTIGEN
+// ============================================================
+// De knop vult zich met je kleur zolang je hem ingedrukt houdt.
+// Pas als hij vol is, gaat de actie door. Te vroeg los = niks.
+const HOLD_MS = 1000;
+
+function holdToConfirm(btn, onConfirm) {
+  let timer = null;
+  let fill = null;
+
+  function start(e) {
+    if (btn.disabled || timer) return;
+    if (e && e.pointerId !== undefined) {
+      if (e.button > 0) return;
+      try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    // Kopie van de knopinhoud in de vulkleur, die van links naar rechts zichtbaar wordt
+    fill = document.createElement("span");
+    fill.className = "hold-fill";
+    fill.setAttribute("aria-hidden", "true");
+    fill.innerHTML = btn.innerHTML;
+    btn.appendChild(fill);
+    void fill.offsetWidth;
+    btn.classList.add("holding");
+    if (navigator.vibrate) navigator.vibrate(8);
+    timer = setTimeout(() => {
+      timer = null;
+      btn.classList.remove("holding");
+      btn.classList.add("held");
+      if (navigator.vibrate) navigator.vibrate([18, 40, 30]);
+      setTimeout(() => { btn.classList.remove("held"); removeFill(); }, 260);
+      onConfirm();
+    }, HOLD_MS);
+  }
+
+  function removeFill() {
+    const f = fill;
+    fill = null;
+    if (f) setTimeout(() => f.remove(), 220);
+  }
+
+  function cancel() {
+    if (!timer) return;
+    clearTimeout(timer);
+    timer = null;
+    btn.classList.remove("holding");
+    removeFill();
+    replay(btn, "nudge");
+    const note = $("action-note");
+    if (note && btn === detailButton) { note.textContent = "Houd de knop ingedrukt om af te vinken"; replay(note, "flash"); }
+  }
+
+  btn.addEventListener("pointerdown", start);
+  btn.addEventListener("pointerup", cancel);
+  btn.addEventListener("pointercancel", cancel);
+  btn.addEventListener("pointermove", (e) => {
+    if (!timer) return;
+    const r = btn.getBoundingClientRect();
+    const m = 24; // beetje speling voor een bibberende duim
+    if (e.clientX < r.left - m || e.clientX > r.right + m || e.clientY < r.top - m || e.clientY > r.bottom + m) cancel();
+  });
+  btn.addEventListener("contextmenu", (e) => e.preventDefault());
+  // Toetsenbord: spatie/enter ingedrukt houden
+  btn.addEventListener("keydown", (e) => {
+    if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); start(); }
+  });
+  btn.addEventListener("keyup", (e) => { if (e.key === " " || e.key === "Enter") cancel(); });
+  btn.addEventListener("blur", cancel);
+}
+
+holdToConfirm(detailButton, () => {
   if (!currentMemberId || detailButton.disabled) return;
   const s = stateFor(currentMemberId);
   complete(s.tasks.filter((t, i) => !s.done[i]).map(t => t.id));
